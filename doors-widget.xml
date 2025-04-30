@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs title="DOORS Artifact Info Widget" height="300">
+    <Require feature="dynamic-height"/>
+    <Require feature="rpc"/>
+    <Require feature="views"/>
+    <Require feature="oslc.jazz.core.context"/>
+  </ModulePrefs>
+  <Content type="html">
+    <![CDATA[
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 10px; }
+          pre { background: #f4f4f4; padding: 10px; border-radius: 5px; }
+        </style>
+      </head>
+      <body>
+        <h3>DOORS Artifact Info</h3>
+        <div id="output">Loading...</div>
+
+        <script>
+          gadgets.util.registerOnLoadHandler(function() {
+            const context = gadgets.views.getParams();
+            const artifactUrl = context["oslc.selection"];
+
+            if (!artifactUrl) {
+              document.getElementById("output").innerText = "No artifact selected.";
+              return;
+            }
+
+            fetch(artifactUrl, {
+              headers: { "Accept": "application/json" },
+              credentials: "include"
+            })
+            .then(response => response.json())
+            .then(data => {
+              document.getElementById("output").innerHTML =
+                `<b>Title:</b> ${data["dcterms:title"]}<br>
+                 <b>Identifier:</b> ${data["dcterms:identifier"]}<br><br>
+                 <pre>${JSON.stringify(data, null, 2)}</pre>`;
+            })
+            .catch(err => {
+              document.getElementById("output").innerText = `Failed to load: ${err}`;
+            });
+          });
+        </script>
+      </body>
+      </html>
+    ]]>
+  </Content>
+</Module>
